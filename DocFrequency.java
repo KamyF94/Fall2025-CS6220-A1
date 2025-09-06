@@ -23,12 +23,10 @@ public class DocFrequency {
             filename.set(fileNameStr);
 
             String[] tokens = value.toString().split("\\W+");
-            HashSet<String> seen = new HashSet<>();
             for (String token : tokens) {
-                if (token.length() > 0 && !seen.contains(token)) {
-                    word.set(token);
+                if (token.length() > 0) {
+                    word.set(token.toLowerCase());
                     context.write(word, filename);
-                    seen.add(token);
                 }
             }
         }
@@ -51,8 +49,15 @@ public class DocFrequency {
         job.setJarByClass(DocFrequency.class);
         job.setMapperClass(Map.class);
         job.setReducerClass(Reduce.class);
+
+        // Mapper output
+        job.setMapOutputKeyClass(Text.class);
+        job.setMapOutputValueClass(Text.class);
+
+        // Reducer output
         job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(Text.class);
+        job.setOutputValueClass(IntWritable.class);
+
         FileInputFormat.addInputPath(job, new Path(args[0]));
         FileOutputFormat.setOutputPath(job, new Path(args[1]));
         System.exit(job.waitForCompletion(true) ? 0 : 1);
